@@ -7,3 +7,5 @@ uvicorn
 streamlit
 requests
 python-multipart
+python-dotenv
+python-telegram-bot==21.10

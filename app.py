@@ -29,21 +29,29 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-def call_api(method, path, payload=None):
+def call_api(method, path, payload=None, timeout=10):
     try:
-        r = requests.request(method, API_URL + path, json=payload, timeout=60)
+        r = requests.request(
+            method,
+            API_URL + path,
+            json=payload,
+            timeout=timeout
+        )
     except requests.ConnectionError:
-        return None, f"API недоступен по адресу {API_URL}. Запустите: uvicorn api:app --reload"
+        return None, f"API недоступен по адресу {API_URL}. Запустите сервер API."
+    except requests.Timeout:
+        return None, "API не ответил вовремя. Проверьте, запущен ли сервер."
     except requests.RequestException as exc:
         return None, f"Ошибка запроса: {exc}"
+
     if r.status_code != 200:
         try:
             detail = r.json().get("detail", r.text)
         except ValueError:
             detail = r.text
         return None, f"API вернул {r.status_code}: {detail}"
-    return r.json(), None
 
+    return r.json(), None
 
 def risk_card(result):
     color = COLORS[result["risk"]]
